@@ -1,5 +1,5 @@
 # Grupo-5
-Gráficos meteorológicos_CAJAMARCA_GORDILLO_SANCHEZ_ZUÑIGA
+#Gráficos meteorológicos_CAJAMARCA_GORDILLO_SANCHEZ_ZUÑIGA
 #Se importa las librerias que utilizaremos
 #Se importa la libreria pandas para poder leer y trabajar con el archivo
 import pandas as pd
