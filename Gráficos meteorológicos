@@ -1,0 +1,188 @@
+# Grupo-5
+Gráficos meteorológicos_CAJAMARCA_GORDILLO_SANCHEZ_ZUÑIGA
+#Se importa las librerias que utilizaremos
+#Se importa la libreria pandas para poder leer y trabajar con el archivo
+import pandas as pd
+#Se importa la libreria matplotlib para realizar las gráficas 
+from matplotlib import pyplot as plt
+#Este diccionario se implementa para poder colocar el clima de la región 
+Climate_Region={'ALT':'Central Alpine north slope',
+         'ANT':'Central Alpine north slope',
+         'RAG':'Northern and central Grisons',
+         'BAS':'Eastern Jura',
+         'BER':'Central Plateau',
+         'CHM':'Western Jura',
+         'CHD':'Western Alpine north slope',
+         'GSB':'Alpine south side',
+         'DAV':'Northern and central Grisons',
+         'ELM':'Eastern Alpine north slope',
+         'ENG':'Central Alpine north slope',
+         'GVE':'Western Plateau',
+         'GRH':'Western Alpine north slope',
+         'GRC':'Valais',
+         'JUN':'Western Alpine north slope',
+         'CDF':'Western Jura',
+         'OTL':'Alpine south side',
+         'LUG':'Alpine south side',
+         'LUZ':'Central Plateau',
+         'MER':'Western Alpine north slope',
+         'NEU':'Western Plateau',
+         'PAY':'Western Plateau',
+         'SBE':'Alpine south side',
+         'SAM':'Engadine',
+         'SAR':'Northern and central Grisons',
+         'SIA':'Engadine',
+         'SIO':'Valais',
+         'STG':'North-eastern plateau',
+         'SAE':'Eastern Alpine north slope',
+         'SMA':'North-eastern plateau'
+         }
+#Aqui se implementa el codigo para que el usuario pueda ingresar el código del archivo que quiera leer
+codigo_observatorio=input('Código: ')
+#Esta linea transforma el código del usario ingresado a mayúsculas 
+codigo_observatorio=codigo_observatorio.upper()
+#Generamos un bucle para que si el usuario se equivoca en el código pueda solucionarlo y lea correctamente 
+while codigo_observatorio not in Climate_Region.keys():#Verifica que el codigo si este en nuestros archivos
+    codigo_observatorio=input('Codigo: ')
+    codigo_observatorio=codigo_observatorio.upper()
+#En esta linea se procede a colocar en la variable direccion la direccion del archivo a leer
+direccion= 'homog_mo_'+codigo_observatorio+'.txt'
+
+#Creamos una funcion para que convierta las columnas de tipo object a tipo string
+def Dia(Columna): 
+    """
+    
+
+    Parameters
+    ----------
+    Columna : TYPE: Objeto
+        DESCRIPTION. Recibe una colunma del Dataframe
+
+    Returns
+    -------
+    Columna : TYPE String
+        DESCRIPTION. Devuelve una columna con sus elemento convertidos en string
+
+    """
+    Columna=str(Columna)
+    #Devuelve ya la columna transformada
+    return Columna
+#Primer if para poder leer los archivos RAG Y JUN
+if codigo_observatorio == 'RAG' or codigo_observatorio == 'JUN':
+    #Lee el archivo con la libreria pandas, delimitanto que comience en la linea 15
+    df=pd.read_csv(direccion,header=15,delim_whitespace=True)
+    #Se coloca en la variable datos todas las lineas de archivo para encontrar los elementos del titulo 
+    datos=pd.read_csv(direccion,nrows=17,sep='\n',encoding= 'unicode_escape',header=None)#Se debe colocar para poder leer sin que un signo interfiera 
+    #Se aplica la funcion Dia en la colunma que estamos especificando
+    df["Year"]= df["Year"].apply(Dia) 
+    df["Month"]= df["Month"].apply(Dia)
+    #Se procede a unir las columnas del mes y el año
+    df["Fecha"]=df["Year"]+"-"+df["Month"]
+    #Se borra las columnas Year y Month
+    df.drop("Year", axis=1,inplace=True)
+    df.drop("Month",axis=1,inplace=True)
+    #Se modifica la fecha con el comando Datetime
+    df["Fecha"]=pd.to_datetime(df["Fecha"])
+    #Aqui se busca el nombre para la grafica 
+    nombre=(datos.iloc[3]).str.split(':',expand=True) #expand se usa en modo True para dividir en columnas. 
+    nombre=str(nombre.at[0,1]).strip() #Elimina los espacios en blanco en el scrip
+    #Aqui se busca la altitud para la grafica 
+    altitud=(datos.iloc[4]).str.split(':',expand=True)
+    altitud=str(altitud.at[0,1]).strip()
+    # Para una poder graficar reemplazamos el Na por cero 
+    df.replace("Na", "0")
+    # Para sacar la media de la Temperatura 
+    media= df["Temperature"].mean()
+    #####Gráfica###
+    plt.plot(df["Fecha"],df["Temperature"],label='Temperatura')
+    ####Gráfica la linea de la media en el grafico####
+    plt.axhline(y=media, color="red", lw=3, linestyle="--",label='Temperatura Media')
+    #Agrega el color a los parametros en el eje x o y segun se selecciona en axis= x o y 
+    plt.tick_params(axis='y',labelcolor='blue')#Esta funcion selecciona el eje y lo modifica como el usuario quiero
+    #Las siguientes lineas sirven para colocar los titulos en los ejes
+    plt.ylabel('Temperatura',color='blue')
+    plt.xlabel('Fecha')
+    #Aqui se agrega y modifica el titulo de la gráfica
+    plt.title(nombre + ' / ' + codigo_observatorio + ' / ' + altitud + ' / ' + Climate_Region.get(codigo_observatorio))
+    #Aqui se aumenta el tamaño de la letra
+    plt.rc('axes', titlesize=20)#Modifica el tamaño de la letra del titulo
+    #Agregamos la leyenda en el gráfico
+    plt.legend()
+    plt.show()
+
+#Este elif sirve para poder leer y graficar el archivo con código SAR    
+elif codigo_observatorio == 'SAR':
+    #Lee el archivo con la libreria pandas, delimitanto que comience en la linea 15
+    df=pd.read_csv(direccion,header=15,delim_whitespace=True)
+    #Estas siguientes lineas cumplen la misma funcion que las lineas anteriores para tranformas las columnas en string
+    datos=pd.read_csv(direccion,nrows=17,sep='\n',encoding= 'unicode_escape',header=None)
+    df["Year"]= df["Year"].apply(Dia)
+    df["Month"]= df["Month"].apply(Dia)
+    df["Fecha"]=df["Year"]+"-"+df["Month"]
+    df.drop("Year", axis=1,inplace=True)
+    df.drop("Month",axis=1,inplace=True)
+    df["Fecha"]=pd.to_datetime(df["Fecha"])
+    #Se busca en el archivo los datos para el título
+    nombre=(datos.iloc[3]).str.split(':',expand=True)
+    nombre=str(nombre.at[0,1]).strip()
+    altitud=(datos.iloc[4]).str.split(':',expand=True)
+    altitud=str(altitud.at[0,1]).strip()
+    
+    #Se reemplaza los valores Na con 0
+    df.replace("Na", "0")
+    #Se encuentra la media de los datos del archivo
+    media= df["Precipitation"].mean()
+    #Lineas para graficar nuestro archivo
+    plt.plot(df["Fecha"],df["Precipitation"],label='Precipitación',color='red')
+    #Se grafica la linea de la media dentro d la grafica anterior
+    plt.axhline(y=media, color="blue",lw=3, linestyle="--",label='Precipitación Media')
+    plt.tick_params(axis='y',labelcolor='red')
+    plt.title(nombre + ' / ' + codigo_observatorio + ' / ' + altitud + ' / ' + Climate_Region.get(codigo_observatorio))
+    plt.rc('axes', titlesize=20)#Modifica el tamaño de la letra del titulo
+    plt.ylabel('Precipitación',color='red')
+    plt.xlabel('Fecha')
+    plt.legend()
+    plt.show()
+    
+    
+else:
+    #Lee el archivo con la libreria pandas, delimitanto que comience en la linea 15
+    df=pd.read_csv(direccion,header=18,delim_whitespace=True)
+    datos=pd.read_csv(direccion,nrows=17,sep='\n',encoding= 'unicode_escape',header=None)
+    df["Year"]= df["Year"].apply(Dia)
+    df["Month"]= df["Month"].apply(Dia)
+    df["Fecha"]=df["Year"]+"-"+df["Month"]
+    df.drop("Year", axis=1,inplace=True)
+    df.drop("Month",axis=1,inplace=True)
+    df["Fecha"]=pd.to_datetime(df["Fecha"])
+    nombre=(datos.iloc[3]).str.split(':',expand=True)
+    nombre=str(nombre.at[0,1]).strip()
+    altitud=(datos.iloc[4]).str.split(':',expand=True)
+    altitud=str(altitud.at[0,1]).strip()
+    
+    mediaT= df["Temperature"].mean()
+    mediaP= df["Precipitation"].mean()
+    #Define el eje x 
+    T=df["Fecha"]
+    #Define los ejes y de las gráficas
+    dato1=df["Temperature"]
+    dato2=df["Precipitation"]
+    #Sirve para comparar dos graficos en el mismo eje 
+    fig,ax1= plt.subplots()
+    color="tab:blue"#Definimos el color a usar
+    ax1.plot(T,dato1, color=color, label="Temperatura")#Grafica la primera colunma
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.set_ylabel('Temperatura', color=color)#Agrega el titulo al eje y 
+    ax1.axhline(y=mediaT, color="green", lw= 3, linestyle="--",label='Temperatura Media')
+    ax1.set_xlabel("Fecha")#Agrega titulo al eje x
+    ax2=ax1.twinx()# Sirve para que las dos graficas compartan el mismo eje 
+    color="tab:red"
+    ax2.plot(T,dato2,color=color, label="Precipitación")
+    ax2.tick_params(axis='y',labelcolor=color)
+    ax2.set_ylabel('Precipitación', color=color)
+    ax2.axhline(y=mediaP, color="yellow", lw=3, linestyle="--",label='Precipitación Media')    
+    fig.legend(ncol=2)# Hace que las leyendas enten en dos colunmas
+    plt.title(nombre + ' / ' + codigo_observatorio + ' / ' + altitud + ' / ' + Climate_Region.get(codigo_observatorio))
+    fig.tight_layout()
+    plt.rc('axes', titlesize=20)#Modifica el tamaño de la letra del titulo
+    plt.show()
